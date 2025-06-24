@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festbuzzz - Discover College Festivals in Pune</title>
+    <meta name="description" content="Discover amazing college festivals in Pune. Find cultural, technical, sports, and management events from top colleges like COEP, IIIT Pune, MIT-WPU, and more.">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Sample events data
+        const sampleEvents = [
+            {
+                id: 'evt1',
+                name: "Concetto",
+                description: "Annual technical festival of COEP featuring robotics, coding competitions, and tech exhibitions. India's premier engineering fest.",
+                date: "2024-02-15",
+                location: "College of Engineering Pune (COEP)",
+                category: "Technical",
+                price: 250,
+                maxAttendees: 5000,
+                organizerContact: "concetto@coep.ac.in",
+                college: "COEP",
+                featured: true
+            },
+            {
+                id: 'evt2',
+                name: "Effervescence",
+                description: "Most awaited cultural festival of IIIT Pune with music, dance, drama, and celebrity performances.",
+                date: "2024-03-20",
+                location: "IIIT Pune Campus",
+                category: "Cultural",
+                price: 300,
+                maxAttendees: 8000,
+                organizerContact: "effervescence@iiitpune.ac.in",
+                college: "IIIT Pune",
+                featured: true
+            },
+            {
+                id: 'evt3',
+                name: "Abhiyantriki",
+                description: "Technical symposium at VIT Pune showcasing innovation in engineering and technology.",
+                date: "2024-01-25",
+                location: "Vishwakarma Institute of Technology",
+                category: "Technical",
+                price: 200,
+                maxAttendees: 3000,
+                organizerContact: "abhiyantriki@vit.edu",
+                college: "VIT Pune",
+                featured: false
+            },
+            {
+                id: 'evt4',
+                name: "Zephyr",
+                description: "Sports extravaganza at MIT-WPU featuring cricket, football, basketball, and athletics.",
+                date: "2024-04-10",
+                location: "MIT World Peace University",
+                category: "Sports",
+                price: 150,
+                maxAttendees: 4000,
+                organizerContact: "zephyr@mitwpu.edu.in",
+                college: "MIT-WPU",
+                featured: false
+            },
+            {
+                id: 'evt5',
+                name: "Pratibimb",
+                description: "Cultural fest at BMCC celebrating arts, literature, and performing arts with workshops and competitions.",
+                date: "2024-02-28",
+                location: "Brihan Maharashtra College of Commerce",
+                category: "Cultural",
+                price: 180,
+                maxAttendees: 2500,
+                organizerContact: "pratibimb@bmcc.ac.in",
+                college: "BMCC",
+                featured: false
+            },
+            {
+                id: 'evt6',
+                name: "Impressions",
+                description: "Management fest at SCMHRD featuring case studies, business simulations, and leadership workshops.",
+                date: "2024-03-05",
+                location: "Symbiosis Centre for Management Studies",
+                category: "Management",
+                price: 400,
+                maxAttendees: 1500,
+                organizerContact: "impressions@scmhrd.edu",
+                college: "SCMHRD",
+                featured: true
+            },
+            {
+                id: 'evt7',
+                name: "Cognizance",
+                description: "Technical festival at PICT featuring AI/ML competitions, hackathons, and tech talks.",
+                date: "2024-01-18",
+                location: "Pune Institute of Computer Technology",
+                category: "Technical",
+                price: 220,
+                maxAttendees: 3500,
+                organizerContact: "cognizance@pict.edu",
+                college: "PICT",
+                featured: false
+            },
+            {
+                id: 'evt8',
+                name: "Parichay",
+                description: "Annual cultural celebration at Fergusson College with traditional and modern performances.",
+                date: "2024-02-08",
+                location: "Fergusson College",
+                category: "Cultural",
+                price: 120,
+                maxAttendees: 2000,
+                organizerContact: "parichay@fergusson.edu",
+                college: "Fergusson College",
+                featured: false
+            }
+        ];
+
+        // Main App Component
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [selectedEvent, setSelectedEvent] = useState(null);
+            const [selectedCategory, setSelectedCategory] = useState('');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [events, setEvents] = useState(sampleEvents);
+
+            const categories = [
+                { name: 'Cultural', color: 'from-pink-500 to-rose-500', icon: '🎭' },
+                { name: 'Technical', color: 'from-blue-500 to-cyan-500', icon: '💻' },
+                { name: 'Sports', color: 'from-green-500 to-emerald-500', icon: '🏆' },
+                { name: 'Management', color: 'from-purple-500 to-indigo-500', icon: '📊' }
+            ];
+
+            const filteredEvents = events.filter(event => {
+                if (selectedCategory && event.category !== selectedCategory) return false;
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    return event.name.toLowerCase().includes(query) ||
+                           event.college.toLowerCase().includes(query) ||
+                           event.description.toLowerCase().includes(query);
+                }
+                return true;
+            });
+
+            const featuredEvents = events.filter(event => event.featured);
+
+            // Home Page Component
+            function HomePage() {
+                return (
+                    <div className="min-h-screen gradient-bg">
+                        <div className="container mx-auto px-4 py-8">
+                            {/* Hero Section */}
+                            <div className="text-center mb-12">
+                                <div className="flex items-center justify-center gap-2 mb-4">
+                                    <span className="text-4xl">✨</span>
+                                    <h1 className="text-4xl md:text-6xl font-bold text-white">Festbuzzz</h1>
+                                    <span className="text-4xl">✨</span>
+                                </div>
+                                <p className="text-xl text-white/80 mb-8">Discover Amazing College Festivals in Pune</p>
+                                <div className="max-w-md mx-auto relative">
+                                    <input 
+                                        type="text"
+                                        placeholder="Search festivals..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30" 
+                                    />
+                                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50">🔍</span>
+                                </div>
+                            </div>
+
+                            {/* Categories Section */}
+                            <div className="mb-12">
+                                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <span>📈</span>
+                                    Explore Categories
+                                </h2>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {categories.map(category => (
+                                        <div 
+                                            key={category.name}
+                                            onClick={() => {
+                                                setSelectedCategory(category.name);
+                                                setCurrentPage('events');
+                                            }}
+                                            className={`p-6 rounded-xl bg-gradient-to-r ${category.color} text-white hover:scale-105 transition-transform cursor-pointer card-hover`}
+                                        >
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-4xl">{category.icon}</span>
+                                                <span className="text-2xl font-bold">
+                                                    {events.filter(e => e.category === category.name).length}
+                                                </span>
+                                            </div>
+                                            <h3 className="font-semibold">{category.name}</h3>
+                                            <p className="text-sm opacity-90">Events</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Featured Events Section */}
+                            <div className="mb-12">
+                                <h2 className="text-2xl font-bold text-white mb-6">Featured Events</h2>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    {featuredEvents.slice(0, 2).map(event => (
+                                        <div 
+                                            key={event.id}
+                                            onClick={() => {
+                                                setSelectedEvent(event);
+                                                setCurrentPage('eventDetail');
+                                            }}
+                                            className="bg-white/10 backdrop-blur-md rounded-xl p-6 hover:bg-white/20 transition-colors cursor-pointer card-hover"
+                                        >
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-white mb-2">{event.name}</h3>
+                                                    <p className="text-white/70 text-sm mb-2">{event.college}</p>
+                                                </div>
+                                                <span className="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-semibold">
+                                                    Featured
+                                                </span>
+                                            </div>
+                                            
+                                            <p className="text-white/80 text-sm mb-4 line-clamp-2">{event.description}</p>
+                                            
+                                            <div className="flex items-center justify-between text-sm text-white/70">
+                                                <div className="flex items-center gap-1">
+                                                    <span>📅</span>
+                                                    <span>{event.date}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span>₹</span>
+                                                    <span>₹{event.price}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-4 mt-3 text-sm text-white/70">
+                                                <div className="flex items-center gap-1">
+                                                    <span>📍</span>
+                                                    <span className="truncate">{event.location}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span>👥</span>
+                                                    <span>{event.maxAttendees} max</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* View All Events Button */}
+                            <div className="text-center">
+                                <button 
+                                    onClick={() => {
+                                        setSelectedCategory('');
+                                        setCurrentPage('events');
+                                    }}
+                                    className="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-lg backdrop-blur-md transition-colors"
+                                >
+                                    View All Events
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Events Page Component
+            function EventsPage() {
+                return (
+                    <div className="min-h-screen gradient-bg p-4">
+                        <div className="container mx-auto">
+                            <div className="flex items-center gap-4 mb-6">
+                                <button 
+                                    onClick={() => setCurrentPage('home')}
+                                    className="text-white/70 hover:text-white flex items-center gap-2"
+                                >
+                                    <span>←</span> Back to Home
+                                </button>
+                            </div>
+
+                            <h1 className="text-3xl font-bold text-white mb-8 text-center">
+                                {selectedCategory ? `${selectedCategory} Events` : 'All Events'}
+                            </h1>
+                            
+                            {/* Filter Buttons */}
+                            <div className="flex justify-center gap-2 flex-wrap mb-8">
+                                <button
+                                    onClick={() => setSelectedCategory('')}
+                                    className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                                        !selectedCategory ? 'bg-white text-purple-900' : 'bg-white/10 text-white hover:bg-white/20'
+                                    }`}
+                                >
+                                    All
+                                </button>
+                                {categories.map(category => (
+                                    <button
+                                        key={category.name}
+                                        onClick={() => setSelectedCategory(category.name)}
+                                        className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                                            selectedCategory === category.name ? 'bg-white text-purple-900' : 'bg-white/10 text-white hover:bg-white/20'
+                                        }`}
+                                    >
+                                        {category.name}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Events Grid */}
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {filteredEvents.map(event => (
+                                    <div 
+                                        key={event.id}
+                                        onClick={() => {
+                                            setSelectedEvent(event);
+                                            setCurrentPage('eventDetail');
+                                        }}
+                                        className="bg-white/10 backdrop-blur-md rounded-xl p-6 hover:bg-white/20 transition-colors cursor-pointer card-hover"
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-white mb-1">{event.name}</h3>
+                                                <p className="text-white/70 text-sm">{event.college}</p>
+                                            </div>
+                                            {event.featured && (
+                                                <span className="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-semibold ml-2">
+                                                    Featured
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 ${
+                                            event.category === 'Cultural' ? 'bg-pink-500/20 text-pink-200' :
+                                            event.category === 'Technical' ? 'bg-blue-500/20 text-blue-200' :
+                                            event.category === 'Sports' ? 'bg-green-500/20 text-green-200' :
+                                            'bg-purple-500/20 text-purple-200'
+                                        }`}>
+                                            {event.category}
+                                        </span>
+                                        
+                                        <p className="text-white/80 text-sm mb-4 line-clamp-3">{event.description}</p>
+                                        
+                                        <div className="space-y-2 text-sm text-white/70">
+                                            <div className="flex items-center gap-2">
+                                                <span>📅</span>
+                                                <span>{event.date}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span>📍</span>
+                                                <span className="truncate">{event.location}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <span>👥</span>
+                                                    <span>{event.maxAttendees} max</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span>₹</span>
+                                                    <span className="font-semibold">₹{event.price}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {filteredEvents.length === 0 && (
+                                <div className="text-center text-white/70 py-12">
+                                    <p>No events found matching your criteria.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+
+            // Event Detail Page Component
+            function EventDetailPage() {
+                if (!selectedEvent) return null;
+
+                return (
+                    <div className="min-h-screen gradient-bg p-4">
+                        <div className="container mx-auto max-w-4xl">
+                            <button 
+                                onClick={() => setCurrentPage('events')}
+                                className="text-white/70 hover:text-white mb-6 flex items-center gap-2"
+                            >
+                                <span>←</span> Back to Events
+                            </button>
+
+                            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div>
+                                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{selectedEvent.name}</h1>
+                                        <p className="text-xl text-white/80">{selectedEvent.college}</p>
+                                    </div>
+                                    {selectedEvent.featured && (
+                                        <span className="bg-yellow-400 text-black px-3 py-2 rounded-full text-sm font-semibold">
+                                            Featured Event
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div>
+                                        <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-4 ${
+                                            selectedEvent.category === 'Cultural' ? 'bg-pink-500/20 text-pink-200' :
+                                            selectedEvent.category === 'Technical' ? 'bg-blue-500/20 text-blue-200' :
+                                            selectedEvent.category === 'Sports' ? 'bg-green-500/20 text-green-200' :
+                                            'bg-purple-500/20 text-purple-200'
+                                        }`}>
+                                            {selectedEvent.category} Event
+                                        </span>
+
+                                        <h2 className="text-xl font-semibold text-white mb-3">About This Event</h2>
+                                        <p className="text-white/80 mb-6 leading-relaxed">{selectedEvent.description}</p>
+
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3 text-white/80">
+                                                <span className="text-white/60">📅</span>
+                                                <div>
+                                                    <span className="font-semibold">Date:</span> {selectedEvent.date}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-start gap-3 text-white/80">
+                                                <span className="text-white/60 mt-0.5">📍</span>
+                                                <div>
+                                                    <span className="font-semibold">Location:</span><br />
+                                                    {selectedEvent.location}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 text-white/80">
+                                                <span className="text-white/60">👥</span>
+                                                <div>
+                                                    <span className="font-semibold">Max Attendees:</span> {selectedEvent.maxAttendees}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 text-white/80">
+                                                <span className="text-white/60">📧</span>
+                                                <div>
+                                                    <span className="font-semibold">Contact:</span> {selectedEvent.organizerContact}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="bg-white/10 rounded-xl p-6 mb-6">
+                                            <div className="text-center mb-4">
+                                                <div className="flex items-center justify-center gap-2 text-3xl font-bold text-white mb-2">
+                                                    <span>₹</span>
+                                                    {selectedEvent.price}
+                                                </div>
+                                                <p className="text-white/70">Entry Fee</p>
+                                            </div>
+
+                                            <button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 mb-3">
+                                                Register Now
+                                            </button>
+
+                                            <button className="w-full bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-lg backdrop-blur-md transition-colors">
+                                                Add to Favorites
+                                            </button>
+                                        </div>
+
+                                        <div className="bg-white/5 rounded-xl p-6">
+                                            <h3 className="font-semibold text-white mb-3">Event Highlights</h3>
+                                            <ul className="space-y-2 text-white/80 text-sm">
+                                                <li>• {selectedEvent.category} focused activities</li>
+                                                <li>• Networking opportunities</li>
+                                                <li>• Prizes and certificates</li>
+                                                <li>• Expert guest speakers</li>
+                                                <li>• Interactive workshops</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Navigation Bar
+            function Navigation() {
+                return (
+                    <nav className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 z-50">
+                        <div className="flex justify-around items-center py-2 px-4">
+                            <button 
+                                onClick={() => setCurrentPage('home')}
+                                className={`flex flex-col items-center p-2 transition-colors ${
+                                    currentPage === 'home' ? 'text-white' : 'text-white/70 hover:text-white'
+                                }`}
+                            >
+                                <span className="text-2xl mb-1">✨</span>
+                                <span className="text-xs">Home</span>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setSelectedCategory('');
+                                    setCurrentPage('events');
+                                }}
+                                className={`flex flex-col items-center p-2 transition-colors ${
+                                    currentPage === 'events' ? 'text-white' : 'text-white/70 hover:text-white'
+                                }`}
+                            >
+                                <span className="text-2xl mb-1">📅</span>
+                                <span className="text-xs">Events</span>
+                            </button>
+                            <button className="flex flex-col items-center p-2 text-white/70 hover:text-white transition-colors">
+                                <span className="text-2xl mb-1">❤️</span>
+                                <span className="text-xs">Favorites</span>
+                            </button>
+                            <button className="flex flex-col items-center p-2 text-white/70 hover:text-white transition-colors">
+                                <span className="text-2xl mb-1">👤</span>
+                                <span className="text-xs">Profile</span>
+                            </button>
+                        </div>
+                    </nav>
+                );
+            }
+
+            // Main App Render
+            return (
+                <div className="pb-20">
+                    {currentPage === 'home' && <HomePage />}
+                    {currentPage === 'events' && <EventsPage />}
+                    {currentPage === 'eventDetail' && <EventDetailPage />}
+                    <Navigation />
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
+```
+

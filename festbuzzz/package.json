@@ -1,0 +1,12 @@
+{
+  "name": "festbuzzz",
+  "version": "1.0.0",
+  "description": "Event discovery platform for Pune college festivals",
+  "main": "simple-server.js",
+  "scripts": {
+    "start": "node simple-server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
